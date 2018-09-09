@@ -191,7 +191,7 @@ namespace libgp {
     sum1.setZero(); sum2.setZero(); mean.setZero(); meanofsquare.setZero();
     for (int i = 0; i<(int) sampleset->size();i++){
       sum1 = (sum1 + sampleset ->x(i)).eval();
-      sum2 = (sum2 + ((sampleset ->x(i).array().square()).matrix())).eval();
+      sum2 = (sum2 + (sampleset ->x(i).array().square()).matrix()).eval();
     }
     std = sum2/sampleset->size() - (sum1/sampleset->size()).array().square().matrix();
   }
@@ -203,6 +203,7 @@ namespace libgp {
     sampleset->add(x, y);
     cf->loghyper_changed = true;
     alpha_needs_update = true;
+    std_needs_update = true;
     cached_x_star = NULL;
     return;
 #else
@@ -242,6 +243,7 @@ namespace libgp {
       sampleset->add(x, y);
     cf->loghyper_changed = true;
     alpha_needs_update = true;
+    std_needs_update = true;
     cached_x_star = NULL;
     return;
 #else
@@ -388,10 +390,10 @@ namespace libgp {
     Eigen::VectorXd gradient = Eigen::VectorXd::Zero(input_dim + 2);
     Eigen::VectorXd lh = covf().get_loghyper();
     Eigen::VectorXd ll = lh.head(input_dim);
-    Eigen::RowVectorXd std;
     double lsf  = lh(input_dim);
     double lsn  = lh(input_dim+1);
     int     p   = 30;
+
     update_std();
     gradient.head(input_dim)  = p * ((ll.array() - std.array().log()).pow(p-1)).matrix() / pow(log(ls), p);
     gradient(input_dim)       = p * pow(lsf - lsn,p-1) / pow(log(snr),p);
