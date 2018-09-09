@@ -21,6 +21,7 @@ namespace libgp
     double get(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2);
     void grad(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2, Eigen::VectorXd &grad);
     void set_loghyper(const Eigen::VectorXd &p);
+    Eigen::MatrixXd get_lamda_invsqrt();
     virtual std::string to_string();
   private:
     size_t param_dim_first;

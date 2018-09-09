@@ -115,6 +115,15 @@ namespace libgp {
     update_k_star(x_star);
     return k_star.dot(alpha);    
   }
+
+  double GaussianProcess::f(const Eigen::VectorXd x)
+  {
+    if (sampleset->empty()) return 0;
+    compute();
+    update_alpha();
+    update_k_star(x);
+    return k_star.dot(alpha);
+  }
   
   double GaussianProcess::var(const double x[])
   {
@@ -168,6 +177,23 @@ namespace libgp {
     int n = sampleset->size();
     alpha = L.topLeftCorner(n, n).triangularView<Eigen::Lower>().solve(y);
     L.topLeftCorner(n, n).triangularView<Eigen::Lower>().adjoint().solveInPlace(alpha);
+
+    inv_K = L.topLeftCorner(n, n).triangularView<Eigen::Lower>().solve(Eigen::MatrixXd::Identity(n,n));
+    L.topLeftCorner(n, n).triangularView<Eigen::Lower>().adjoint().solveInPlace(inv_K);
+  }
+
+  void GaussianProcess::update_std(){
+    if (!std_needs_update) return;
+    std_needs_update = false;
+    std.resize(input_dim);
+
+    Eigen::VectorXd sum1(input_dim), sum2(input_dim), mean(input_dim), meanofsquare(input_dim);
+    sum1.setZero(); sum2.setZero(); mean.setZero(); meanofsquare.setZero();
+    for (int i = 0; i<(int) sampleset->size();i++){
+      sum1 = (sum1 + sampleset ->x(i)).eval();
+      sum2 = (sum2 + ((sampleset ->x(i).array().square()).matrix())).eval();
+    }
+    std = sum2/sampleset->size() - (sum1/sampleset->size()).array().square().matrix();
   }
   
   void GaussianProcess::add_pattern(const double x[], double y)
@@ -205,8 +231,48 @@ namespace libgp {
       L(n,n) = sqrt(kappa - k.dot(k));
     }
     alpha_needs_update = true;
+    std_needs_update = true;
 #endif
   }
+
+    void GaussianProcess::add_pattern(const Eigen::VectorXd x, double y)
+    {
+      //std::cout<< L.rows() << std::endl;
+#if 0
+      sampleset->add(x, y);
+    cf->loghyper_changed = true;
+    alpha_needs_update = true;
+    cached_x_star = NULL;
+    return;
+#else
+      int n = sampleset->size();
+      sampleset->add(x, y);
+      // create kernel matrix if sampleset is empty
+      if (n == 0) {
+        L(0,0) = sqrt(cf->get(sampleset->x(0), sampleset->x(0)));
+        cf->loghyper_changed = false;
+        // recompute kernel matrix if necessary
+      } else if (cf->loghyper_changed) {
+        compute();
+        // update kernel matrix
+      } else {
+        Eigen::VectorXd k(n);
+        for (int i = 0; i<n; ++i) {
+          k(i) = cf->get(sampleset->x(i), sampleset->x(n));
+        }
+        double kappa = cf->get(sampleset->x(n), sampleset->x(n));
+        // resize L if necessary
+        if (sampleset->size() > static_cast<std::size_t>(L.rows())) {
+          L.conservativeResize(n + initial_L_size, n + initial_L_size);
+        }
+        L.topLeftCorner(n, n).triangularView<Eigen::Lower>().solveInPlace(k);
+        L.block(n,0,1,n) = k.transpose();
+        L(n,n) = sqrt(kappa - k.dot(k));
+      }
+      alpha_needs_update = true;
+      std_needs_update = true;
+#endif
+    }
 
   bool GaussianProcess::set_y(size_t i, double y) 
   {
@@ -267,6 +333,20 @@ namespace libgp {
     return input_dim;
   }
 
+  Eigen::VectorXd GaussianProcess::get_alpha()
+  {
+      compute();
+      update_alpha();
+      return alpha;
+  }
+
+  Eigen::MatrixXd GaussianProcess::get_inv_K()
+  {
+      compute();
+      update_alpha();
+      return inv_K;
+  }
+
   double GaussianProcess::log_likelihood()
   {
     compute();
@@ -302,5 +382,21 @@ namespace libgp {
     }
 
     return grad;
+  }
+
+  Eigen::VectorXd GaussianProcess::compute_curb_gradient(double snr, double ls){
+    Eigen::VectorXd gradient = Eigen::VectorXd::Zero(input_dim + 2);
+    Eigen::VectorXd lh = covf().get_loghyper();
+    Eigen::VectorXd ll = lh.head(input_dim);
+    Eigen::RowVectorXd std;
+    double lsf  = lh(input_dim);
+    double lsn  = lh(input_dim+1);
+    int     p   = 30;
+    update_std();
+    gradient.head(input_dim)  = p * ((ll.array() - std.array().log()).pow(p-1)).matrix() / pow(log(ls), p);
+    gradient(input_dim)       = p * pow(lsf - lsn,p-1) / pow(log(snr),p);
+    gradient(input_dim + 1)   = - p * pow(lsf - lsn,p-1) / pow(log(snr),p);
+
+    return gradient;
   }
 }

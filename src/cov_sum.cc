@@ -52,6 +52,11 @@ namespace libgp
     first->set_loghyper(p.head(param_dim_first));
     second->set_loghyper(p.tail(param_dim_second));
   }
+
+  Eigen::MatrixXd CovSum::get_lamda_invsqrt()
+  {
+    return first->get_lamda_invsqrt();
+  }
   
   std::string CovSum::to_string()
   {

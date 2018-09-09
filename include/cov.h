@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
 
 namespace libgp
 {
@@ -66,6 +67,9 @@ namespace libgp
       /** Update parameter vector.
        *  @param p new parameter vector */
       virtual void set_loghyper(const double p[]);
+
+      // Get lamda^(-0.5) sparse matrix
+      virtual Eigen::MatrixXd get_lamda_invsqrt();
 
       /** Get number of parameters for this covariance function.
        *  @return parameter vector dimensionality */

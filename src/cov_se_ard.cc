@@ -38,13 +38,24 @@ namespace libgp
   void CovSEard::set_loghyper(const Eigen::VectorXd &p)
   {
     CovarianceFunction::set_loghyper(p);
-    for(size_t i = 0; i < input_dim; ++i) ell(i) = exp(loghyper(i));
+    Eigen::MatrixXd temp = Eigen::MatrixXd::Identity(input_dim,input_dim);
+    for(size_t i = 0; i < input_dim; ++i)
+    {
+      ell(i) = exp(loghyper(i));
+      temp(i,i) = (double) 1/ell(i);
+    }
     sf2 = exp(2*loghyper(input_dim));
+    lamda_invsqrt_sparse = temp;
   }
   
   std::string CovSEard::to_string()
   {
     return "CovSEard";
   }
+
+   Eigen::MatrixXd CovSEard::get_lamda_invsqrt()
+   {
+      return lamda_invsqrt_sparse;
+   }
 }
 

@@ -22,7 +22,11 @@ namespace libgp
   {
     return loghyper;
   }
-  
+
+  Eigen::MatrixXd CovarianceFunction::get_lamda_invsqrt()
+  {
+    return Eigen::MatrixXd::Identity(input_dim, input_dim);
+  }
   void CovarianceFunction::set_loghyper(const Eigen::VectorXd &p)
   {
     assert(p.size() == loghyper.size());

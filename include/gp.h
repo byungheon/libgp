@@ -51,7 +51,8 @@ namespace libgp {
      *  @param x input vector
      *  @return predicted value */
     virtual double f(const double x[]);
-    
+    virtual double f(const Eigen::VectorXd x);
+
     /** Predict variance of prediction for given input.
      *  @param x input vector
      *  @return predicted variance */
@@ -63,6 +64,8 @@ namespace libgp {
      *  @param y output value
      */
     void add_pattern(const double x[], double y);
+
+    void add_pattern(const Eigen::VectorXd x, double y);
 
 
     bool set_y(size_t i, double y);
@@ -79,9 +82,17 @@ namespace libgp {
     /** Get input vector dimensionality. */
     size_t get_input_dim();
 
+    /** Get alpha vector. */
+    Eigen::VectorXd get_alpha();
+
+    /** Get inverse of K matrix */
+    Eigen::MatrixXd get_inv_K();
+
     double log_likelihood();
     
     Eigen::VectorXd log_likelihood_gradient();
+
+    Eigen::VectorXd compute_curb_gradient(double snr, double ls);
 
   protected:
     
@@ -97,10 +108,14 @@ namespace libgp {
     /** Last test kernel vector. */
     Eigen::VectorXd k_star;
 
+    /** standard deviation vector of inputs. */
+    Eigen::VectorXd std;
+
     /** Linear solver used to invert the covariance matrix. */
 //    Eigen::LLT<Eigen::MatrixXd> solver;
     Eigen::MatrixXd L;
-    
+    Eigen::MatrixXd inv_K;
+
     /** Input vector dimensionality. */
     size_t input_dim;
     
@@ -109,10 +124,14 @@ namespace libgp {
 
     void update_alpha();
 
+    void update_std();
+
     /** Compute covariance matrix and perform cholesky decomposition. */
     virtual void compute();
     
     bool alpha_needs_update;
+
+    bool std_needs_update;
 
   private:
 
