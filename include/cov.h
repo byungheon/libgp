@@ -68,6 +68,10 @@ namespace libgp
        *  @param p new parameter vector */
       virtual void set_loghyper(const double p[]);
 
+      /** Update parameter vector.
+       *  @param p new parameter vector */
+      virtual void set_loghyper(const std::vector<double>& vector);
+
       // Get lamda^(-0.5) sparse matrix
       virtual Eigen::MatrixXd get_lamda_invsqrt();
 
