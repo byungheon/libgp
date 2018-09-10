@@ -189,11 +189,15 @@ namespace libgp {
 
     Eigen::VectorXd sum1(input_dim), sum2(input_dim), mean(input_dim), meanofsquare(input_dim);
     sum1.setZero(); sum2.setZero(); mean.setZero(); meanofsquare.setZero();
+    double sum_t1, sum_t2; sum_t1 = 0; sum_t2 = 0;
     for (int i = 0; i<(int) sampleset->size();i++){
       sum1 = (sum1 + sampleset ->x(i)).eval();
       sum2 = (sum2 + (sampleset ->x(i).array().square()).matrix()).eval();
+      sum_t1 += sampleset->y(i);
+      sum_t2 += pow(sampleset->y(i),2);
     }
     std = sum2/sampleset->size() - (sum1/sampleset->size()).array().square().matrix();
+    targetstd = sum_t2/sampleset->size() - pow(sum_t1/sampleset->size(), 2);
   }
   
   void GaussianProcess::add_pattern(const double x[], double y)
@@ -347,6 +351,18 @@ namespace libgp {
       compute();
       update_alpha();
       return inv_K;
+  }
+
+  Eigen::VectorXd GaussianProcess::get_input_std()
+  {
+      update_std();
+      return std;
+  }
+
+  double GaussianProcess::get_target_std()
+  {
+      update_std();
+      return targetstd;
   }
 
   double GaussianProcess::log_likelihood()

@@ -88,6 +88,12 @@ namespace libgp {
     /** Get inverse of K matrix */
     Eigen::MatrixXd get_inv_K();
 
+    /** Get input std */
+    Eigen::VectorXd get_input_std();
+
+    /** Get target std */
+    double get_target_std();
+
     double log_likelihood();
     
     Eigen::VectorXd log_likelihood_gradient();
@@ -110,6 +116,7 @@ namespace libgp {
 
     /** standard deviation vector of inputs. */
     Eigen::VectorXd std;
+    double          targetstd;
 
     /** Linear solver used to invert the covariance matrix. */
 //    Eigen::LLT<Eigen::MatrixXd> solver;
