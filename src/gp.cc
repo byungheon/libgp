@@ -196,7 +196,7 @@ namespace libgp {
       sum_t1 += sampleset->y(i);
       sum_t2 += pow(sampleset->y(i),2);
     }
-    std = sqrt(sum2/sampleset->size() - (sum1/sampleset->size()).array().square().matrix());
+    std = (sum2.array()/sampleset->size() - (sum1/sampleset->size()).array().square()).sqrt().matrix();
     targetstd = sqrt(sum_t2/sampleset->size() - pow(sum_t1/sampleset->size(), 2));
   }
   
