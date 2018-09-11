@@ -33,7 +33,7 @@ void RProp::maximize(GaussianProcess * gp, size_t n, bool verbose, bool curb)
 
   for (size_t i=0; i<n; ++i) {
     Eigen::VectorXd grad = -gp->log_likelihood_gradient();
-      if (curb){
+    if (curb){
       Eigen::VectorXd add  = gp->compute_curb_gradient(1000, 100);
       grad = (grad + add).eval();
     }
@@ -58,6 +58,7 @@ void RProp::maximize(GaussianProcess * gp, size_t n, bool verbose, bool curb)
     }
   }
   gp->covf().set_loghyper(best_params);
+  std::cout << "value: " << gp->log_likelihood() << std::endl;
 }
 
 }

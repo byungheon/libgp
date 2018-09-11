@@ -52,12 +52,15 @@ namespace libgp {
      *  @return predicted value */
     virtual double f(const double x[]);
     virtual double f(const Eigen::VectorXd x);
+    virtual Eigen::RowVectorXd f_derivative(const Eigen::VectorXd x);
+    virtual Eigen::MatrixXd f_dderivative(const Eigen::VectorXd x);
 
     /** Predict variance of prediction for given input.
      *  @param x input vector
      *  @return predicted variance */
     virtual double var(const double x[]);
-    
+    virtual double var(const Eigen::VectorXd x);
+
     /** Add input-output-pair to sample set.
      *  Add a copy of the given input-output-pair to sample set.
      *  @param x input array
@@ -113,6 +116,8 @@ namespace libgp {
     
     /** Last test kernel vector. */
     Eigen::VectorXd k_star;
+    Eigen::MatrixXd k_star_deriv;
+    std::vector<Eigen::MatrixXd> k_star_dderiv;
 
     /** standard deviation vector of inputs. */
     Eigen::VectorXd std;
@@ -128,6 +133,9 @@ namespace libgp {
     
     /** Update test input and cache kernel vector. */
     void update_k_star(const Eigen::VectorXd &x_star);
+
+    void update_k_star_derivative(const Eigen::VectorXd &x_star);
+    void update_k_star_dderivative(const Eigen::VectorXd &x_star);
 
     void update_alpha();
 

@@ -124,6 +124,26 @@ namespace libgp {
     update_k_star(x);
     return k_star.dot(alpha);
   }
+
+  Eigen::RowVectorXd GaussianProcess::f_derivative(const Eigen::VectorXd x){
+    if (sampleset->empty()) return Eigen::RowVectorXd::Zero(input_dim);
+    compute();
+    update_alpha();
+    update_k_star_derivative(x);
+    return alpha.transpose() * k_star_deriv;
+  }
+
+  Eigen::MatrixXd GaussianProcess::f_dderivative(const Eigen::VectorXd x){
+    if (sampleset->empty()) return Eigen::MatrixXd::Zero(input_dim, input_dim);
+    compute();
+    update_alpha();
+    update_k_star_dderivative(x);
+    Eigen::MatrixXd result = Eigen::MatrixXd::Zero(input_dim, input_dim);
+    for(int i = 0; i< sampleset->size();i++){
+      result = (result + alpha(i) * k_star_dderiv[i]).eval();
+    }
+    return result;
+  }
   
   double GaussianProcess::var(const double x[])
   {
@@ -136,6 +156,17 @@ namespace libgp {
     Eigen::VectorXd v = L.topLeftCorner(n, n).triangularView<Eigen::Lower>().solve(k_star);
     return cf->get(x_star, x_star) - v.dot(v);	
   }
+
+  double GaussianProcess::var(const Eigen::VectorXd x)
+    {
+        if (sampleset->empty()) return 0;
+        compute();
+        update_alpha();
+        update_k_star(x);
+        int n = sampleset->size();
+        Eigen::VectorXd v = L.topLeftCorner(n, n).triangularView<Eigen::Lower>().solve(k_star);
+        return cf->get(x, x) - v.dot(v);
+    }
 
   void GaussianProcess::compute()
   {
@@ -162,6 +193,20 @@ namespace libgp {
     k_star.resize(sampleset->size());
     for(size_t i = 0; i < sampleset->size(); ++i) {
       k_star(i) = cf->get(x_star, sampleset->x(i));
+    }
+  }
+
+  void GaussianProcess::update_k_star_derivative(const Eigen::VectorXd &x_star){
+    k_star_deriv.resize(sampleset->size(), input_dim);
+    for(size_t i = 0; i < sampleset->size(); ++i) {
+      k_star_deriv.row(i) = cf->get_derivative(sampleset->x(i), x_star);
+    }
+  }
+
+  void GaussianProcess::update_k_star_dderivative(const Eigen::VectorXd &x_star){
+    k_star_dderiv.clear();k_star_dderiv.reserve(sampleset->size());
+    for(size_t i = 0; i < sampleset->size(); ++i) {
+      k_star_dderiv[i] = (cf->get_dderivative(sampleset->x(i), x_star));
     }
   }
 

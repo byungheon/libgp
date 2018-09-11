@@ -19,6 +19,8 @@ namespace libgp
     virtual ~CovSum ();
     bool init(int n, CovarianceFunction * first, CovarianceFunction * second);
     double get(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2);
+    Eigen::RowVectorXd get_derivative(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2);
+    Eigen::MatrixXd    get_dderivative(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2);
     void grad(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2, Eigen::VectorXd &grad);
     void set_loghyper(const Eigen::VectorXd &p);
     Eigen::MatrixXd get_lamda_invsqrt();

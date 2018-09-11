@@ -26,7 +26,23 @@ namespace libgp
     double z = (x1-x2).cwiseQuotient(ell).squaredNorm();
     return sf2*exp(-0.5*z);
   }
-  
+
+  Eigen::RowVectorXd CovSEard::get_derivative(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2){
+    double z = (x1-x2).cwiseQuotient(ell).squaredNorm();
+    Eigen::VectorXd ellsquare = ell.cwiseProduct(ell);
+    Eigen::VectorXd temp = (x1-x2).cwiseQuotient(ellsquare);
+    return sf2*exp(-0.5*z)*temp.transpose();
+  }
+
+  Eigen::MatrixXd CovSEard::get_dderivative(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2){
+      double z = (x1-x2).cwiseQuotient(ell).squaredNorm();
+      Eigen::VectorXd ellsquare = ell.cwiseProduct(ell);
+      Eigen::VectorXd invell = Eigen::VectorXd::Ones(input_dim).cwiseQuotient(ellsquare);
+      Eigen::VectorXd temp = (x1-x2).cwiseQuotient(ellsquare);
+      Eigen::MatrixXd lamda = invell.asDiagonal();
+      return sf2 * exp(-0.5*z) * (- lamda + temp * temp.transpose());
+  }
+
   void CovSEard::grad(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2, Eigen::VectorXd &grad)
   {
     Eigen::VectorXd z = (x1-x2).cwiseQuotient(ell).array().square();  

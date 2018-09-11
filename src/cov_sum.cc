@@ -35,6 +35,14 @@ namespace libgp
   {
     return first->get(x1, x2) + second->get(x1, x2);
   }
+
+  Eigen::RowVectorXd CovSum::get_derivative(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2){
+    return first->get_derivative(x1, x2) + second->get_derivative(x1,x2);
+  }
+
+  Eigen::MatrixXd CovSum::get_dderivative(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2){
+    return first->get_dderivative(x1, x2) + second->get_dderivative(x1,x2);
+  }
   
   void CovSum::grad(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2, Eigen::VectorXd &grad)
   {

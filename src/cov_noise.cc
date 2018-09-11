@@ -26,7 +26,14 @@ namespace libgp
     if (&x1 == &x2) return s2;
     else return 0.0;
   }
-  
+
+  Eigen::RowVectorXd CovNoise::get_derivative(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2){
+    return Eigen::RowVectorXd::Zero(input_dim);
+  }
+
+  Eigen::MatrixXd CovNoise::get_dderivative(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2){
+      return Eigen::MatrixXd::Zero(input_dim, input_dim);
+  }
   void CovNoise::grad(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2, Eigen::VectorXd &grad)
   {
     if (&x1 == &x2) grad(0) = 2*s2;

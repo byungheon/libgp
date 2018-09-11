@@ -54,6 +54,9 @@ namespace libgp
        *  @return covariance of x1 and x2 */
       virtual double get(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2) = 0;
 
+      virtual Eigen::RowVectorXd get_derivative(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2) {}
+      virtual Eigen::MatrixXd    get_dderivative(const Eigen::VectorXd &x1, const Eigen::VectorXd &x2) {}
+
       /** Covariance gradient of two input vectors with respect to the hyperparameters.
        *  @param x1 first input vector
        *  @param x2 second input vector
@@ -67,10 +70,6 @@ namespace libgp
       /** Update parameter vector.
        *  @param p new parameter vector */
       virtual void set_loghyper(const double p[]);
-
-      /** Update parameter vector.
-       *  @param p new parameter vector */
-      virtual void set_loghyper(const std::vector<double>& vector);
 
       // Get lamda^(-0.5) sparse matrix
       virtual Eigen::MatrixXd get_lamda_invsqrt();
