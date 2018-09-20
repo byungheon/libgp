@@ -204,7 +204,8 @@ namespace libgp {
   }
 
   void GaussianProcess::update_k_star_dderivative(const Eigen::VectorXd &x_star){
-    k_star_dderiv.clear();k_star_dderiv.reserve(sampleset->size());
+    k_star_dderiv.clear();
+    k_star_dderiv = std::vector<Eigen::MatrixXd>(sampleset->size(), Eigen::MatrixXd::Zero(input_dim, input_dim));
     for(size_t i = 0; i < sampleset->size(); ++i) {
       k_star_dderiv[i] = (cf->get_dderivative(sampleset->x(i), x_star));
     }
