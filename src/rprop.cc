@@ -35,7 +35,7 @@ void RProp::maximize(GaussianProcess * gp, size_t n, bool verbose, bool curb)
     Eigen::VectorXd grad = -gp->log_likelihood_gradient();
     if (curb){
       Eigen::VectorXd add  = gp->compute_curb_gradient(1000, 100);
-      grad = (grad + add).eval();
+      grad += add;
     }
     grad_old = grad_old.cwiseProduct(grad);
     for (int j=0; j<grad_old.size(); ++j) {

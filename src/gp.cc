@@ -140,7 +140,7 @@ namespace libgp {
     update_k_star_dderivative(x);
     Eigen::MatrixXd result = Eigen::MatrixXd::Zero(input_dim, input_dim);
     for(int i = 0; i< sampleset->size();i++){
-      result = (result + alpha(i) * k_star_dderiv[i]).eval();
+      result += alpha(i) * k_star_dderiv[i];
     }
     return result;
   }
@@ -237,8 +237,8 @@ namespace libgp {
     sum1.setZero(); sum2.setZero(); mean.setZero(); meanofsquare.setZero();
     double sum_t1, sum_t2; sum_t1 = 0; sum_t2 = 0;
     for (int i = 0; i<(int) sampleset->size();i++){
-      sum1 = (sum1 + sampleset ->x(i)).eval();
-      sum2 = (sum2 + (sampleset ->x(i).array().square()).matrix()).eval();
+      sum1 += sampleset ->x(i);
+      sum2 += (sampleset ->x(i).array().square()).matrix();
       sum_t1 += sampleset->y(i);
       sum_t2 += pow(sampleset->y(i),2);
     }
